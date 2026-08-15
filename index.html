@@ -1,414 +1,67 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Galeria pessoal de fotos e vídeos" />
-  <title>Minha Galeria | Fotos e Vídeos</title>
-  <style>
-    :root {
-      --bg: #09090b;
-      --panel: #151518;
-      --panel-2: #1e1e22;
-      --text: #f7f7f8;
-      --muted: #a1a1aa;
-      --line: rgba(255,255,255,.08);
-      --accent: #7c3aed;
-      --accent-2: #2563eb;
-      --radius: 20px;
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
-
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at 15% 0%, rgba(124,58,237,.17), transparent 30%),
-        radial-gradient(circle at 85% 5%, rgba(37,99,235,.13), transparent 30%),
-        var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-    }
-
-    a { color: inherit; text-decoration: none; }
-    button { font: inherit; }
-
-    .container {
-      width: min(1120px, calc(100% - 32px));
-      margin: 0 auto;
-    }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 20;
-      backdrop-filter: blur(16px);
-      background: rgba(9,9,11,.76);
-      border-bottom: 1px solid var(--line);
-    }
-
-    .nav {
-      min-height: 68px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 20px;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      letter-spacing: -.03em;
-    }
-
-    .brand-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      display: grid;
-      place-items: center;
-      background: linear-gradient(135deg, var(--accent), var(--accent-2));
-      box-shadow: 0 10px 30px rgba(124,58,237,.25);
-    }
-
-    nav ul {
-      list-style: none;
-      display: flex;
-      gap: 6px;
-      padding: 0;
-      margin: 0;
-    }
-
-    nav a {
-      display: inline-flex;
-      padding: 9px 12px;
-      color: var(--muted);
-      border-radius: 10px;
-      transition: .2s ease;
-    }
-
-    nav a:hover {
-      color: var(--text);
-      background: rgba(255,255,255,.06);
-    }
-
-    .hero {
-      padding: 84px 0 56px;
-      text-align: center;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.04);
-      color: #d4d4d8;
-      border-radius: 999px;
-      font-size: .88rem;
-    }
-
-    h1 {
-      margin: 22px auto 16px;
-      max-width: 820px;
-      font-size: clamp(2.6rem, 8vw, 5.6rem);
-      line-height: .98;
-      letter-spacing: -.065em;
-    }
-
-    .gradient-text {
-      background: linear-gradient(90deg, #c4b5fd, #93c5fd, #e0e7ff);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-
-    .hero p {
-      max-width: 650px;
-      margin: 0 auto;
-      color: var(--muted);
-      line-height: 1.7;
-      font-size: 1.05rem;
-    }
-
-    .filters {
-      margin: 26px auto 0;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .filter-btn {
-      border: 1px solid var(--line);
-      color: var(--muted);
-      background: rgba(255,255,255,.035);
-      border-radius: 999px;
-      padding: 10px 16px;
-      cursor: pointer;
-      transition: .2s ease;
-    }
-
-    .filter-btn:hover,
-    .filter-btn.active {
-      color: #fff;
-      border-color: rgba(124,58,237,.45);
-      background: rgba(124,58,237,.16);
-    }
-
-    section { padding: 26px 0 70px; }
-
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 16px;
-      margin-bottom: 22px;
-    }
-
-    .section-head h2 {
-      margin: 0;
-      font-size: clamp(1.7rem, 4vw, 2.4rem);
-      letter-spacing: -.04em;
-    }
-
-    .section-head p {
-      margin: 6px 0 0;
-      color: var(--muted);
-    }
-
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(12, 1fr);
-      gap: 14px;
-    }
-
-    .card {
-      position: relative;
-      overflow: hidden;
-      min-height: 260px;
-      border-radius: var(--radius);
-      background: var(--panel);
-      border: 1px solid var(--line);
-      box-shadow: 0 20px 60px rgba(0,0,0,.18);
-      isolation: isolate;
-    }
-
-    .card.hidden { display: none; }
-
-    .card.photo:nth-child(1) { grid-column: span 7; min-height: 440px; }
-    .card.photo:nth-child(2) { grid-column: span 5; min-height: 440px; }
-    .card.photo:nth-child(3),
-    .card.photo:nth-child(4),
-    .card.photo:nth-child(5) { grid-column: span 4; min-height: 310px; }
-
-    .card img,
-    .card video {
-      width: 100%;
-      height: 100%;
-      display: block;
-      object-fit: cover;
-      transition: transform .45s ease;
-    }
-
-    .card:hover img { transform: scale(1.04); }
-
-    .overlay {
-      position: absolute;
-      inset: auto 0 0;
-      padding: 56px 20px 18px;
-      background: linear-gradient(transparent, rgba(0,0,0,.76));
-      z-index: 2;
-    }
-
-    .overlay strong {
-      display: block;
-      font-size: 1rem;
-    }
-
-    .overlay span {
-      display: block;
-      margin-top: 4px;
-      font-size: .86rem;
-      color: rgba(255,255,255,.7);
-    }
-
-    .videos {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-    }
-
-    .video-card {
-      overflow: hidden;
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-    }
-
-    .video-card video {
-      width: 100%;
-      aspect-ratio: 16 / 9;
-      display: block;
-      object-fit: cover;
-      background: #000;
-    }
-
-    .video-info { padding: 16px 18px 18px; }
-    .video-info h3 { margin: 0 0 6px; font-size: 1rem; }
-    .video-info p { margin: 0; color: var(--muted); font-size: .9rem; }
-
-    .notice {
-      margin-top: 24px;
-      padding: 18px;
-      border: 1px dashed rgba(255,255,255,.15);
-      border-radius: 16px;
-      color: var(--muted);
-      background: rgba(255,255,255,.025);
-      line-height: 1.6;
-    }
-
-    footer {
-      padding: 28px 0 44px;
-      border-top: 1px solid var(--line);
-      color: var(--muted);
-      text-align: center;
-      font-size: .9rem;
-    }
-
-    @media (max-width: 760px) {
-      .nav { min-height: 62px; }
-      nav ul { display: none; }
-      .hero { padding: 62px 0 38px; }
-      .gallery { grid-template-columns: 1fr; }
-      .card.photo:nth-child(n) { grid-column: auto; min-height: 300px; }
-      .videos { grid-template-columns: 1fr; }
-      .section-head { align-items: start; flex-direction: column; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Desenhos.net: aprenda a desenhar centenas de temas do básico ao avançado, crie passo a passo para qualquer assunto, pratique e salve seu progresso.">
+<title>Desenhos.net — Aprenda a desenhar qualquer coisa</title>
+<style>
+:root{--bg:#fffaf2;--paper:#fff;--ink:#1d1b19;--muted:#706a63;--line:#e8dfd3;--yellow:#ffd84d;--orange:#ff914d;--green:#43b97f;--purple:#8f6cff;--shadow:0 14px 40px rgba(83,64,39,.10);--r:22px}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 10% 0,#fff1c8 0,transparent 28%),radial-gradient(circle at 100% 20%,#e9efff 0,transparent 24%),var(--bg);color:var(--ink)}a{color:inherit;text-decoration:none}button,input,select{font:inherit}button{cursor:pointer}.wrap{width:min(1180px,calc(100% - 28px));margin:auto}header{position:sticky;top:0;z-index:30;background:rgba(255,250,242,.92);backdrop-filter:blur(14px);border-bottom:1px solid rgba(120,95,65,.12)}.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:10px;font-weight:950}.logo{width:40px;height:40px;border-radius:14px;background:var(--yellow);display:grid;place-items:center;box-shadow:0 6px 0 #e8b827;transform:rotate(-4deg)}.logo span{transform:rotate(4deg);font-size:22px}.right{display:flex;align-items:center;gap:8px}.links{display:flex;gap:4px}.links a{padding:9px 10px;border-radius:10px;color:var(--muted);font-weight:750}.links a:hover{background:#fff}.account,.btn{border:0;border-radius:13px;padding:11px 14px;font-weight:900}.account,.primary{background:var(--ink);color:#fff}.light{background:#fff;border:1px solid var(--line)}.hero{padding:72px 0 38px;display:grid;grid-template-columns:1.15fr .85fr;gap:36px;align-items:center}.badge{display:inline-flex;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);font-weight:850;box-shadow:var(--shadow);font-size:.88rem}h1{font-size:clamp(3rem,8vw,6rem);line-height:.91;letter-spacing:-.07em;margin:20px 0}.hero p{color:var(--muted);line-height:1.7;font-size:1.06rem;max-width:720px}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:22px}.paper{min-height:360px;border-radius:30px;background:repeating-linear-gradient(#fff 0 29px,#e9edf3 30px 31px);border:1px solid var(--line);box-shadow:var(--shadow);position:relative;overflow:hidden}.d{position:absolute;font-size:clamp(50px,7vw,88px);filter:drop-shadow(0 7px 4px rgba(0,0,0,.08))}.d1{left:12%;top:14%;transform:rotate(-8deg)}.d2{right:12%;top:18%;transform:rotate(9deg)}.d3{left:22%;bottom:12%;transform:rotate(6deg)}.d4{right:18%;bottom:12%;transform:rotate(-7deg)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}.stat{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px}.stat strong{font-size:1.7rem;display:block}.stat span{font-size:.85rem;color:var(--muted)}section{padding:34px 0 68px}.head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:20px}.head h2{font-size:clamp(2rem,5vw,3.2rem);letter-spacing:-.05em;margin:0}.head p{color:var(--muted);line-height:1.6;margin:7px 0 0;max-width:700px}.builder{background:var(--ink);color:#fff;border-radius:26px;padding:25px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:end;margin-bottom:20px}.builder h3{margin:0 0 6px;font-size:1.35rem}.builder p{margin:0 0 13px;color:#d2ccc5}.builder-fields{display:grid;grid-template-columns:1fr 190px;gap:8px}.builder input,.builder select{width:100%;border:0;border-radius:12px;padding:12px}.builder button{background:var(--yellow);color:var(--ink);border:0;border-radius:12px;padding:12px 16px;font-weight:950}.custom-plan{display:none;background:#fff7d8;color:var(--ink);border-radius:18px;padding:18px;margin-bottom:20px;border:1px solid #efd57a}.custom-plan.show{display:block}.custom-plan h3{margin:0 0 8px}.custom-plan ol{margin:8px 0 0;padding-left:22px;line-height:1.65}.toolbar{background:#fff;border:1px solid var(--line);border-radius:18px;padding:11px;display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;box-shadow:var(--shadow)}.search{flex:1;min-width:220px;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fffcf8}.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 11px;font-weight:800;color:var(--muted)}.chip.active{background:var(--ink);color:#fff;border-color:var(--ink)}.categories{display:flex;gap:7px;overflow:auto;padding:2px 0 12px;scrollbar-width:thin}.cat{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:11px;padding:9px 11px;font-weight:800}.cat.active{background:#fff0b2;border-color:#e2c14e}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.lesson{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(83,64,39,.06);display:flex;flex-direction:column;gap:10px}.lesson-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.icon{width:45px;height:45px;border-radius:14px;background:#fff3c6;display:grid;place-items:center;font-size:24px}.level{font-size:.72rem;font-weight:950;border-radius:999px;padding:6px 8px}.easy{background:#e5f8ed;color:#176d45}.medium{background:#fff0cb;color:#875600}.hard{background:#f2e8ff;color:#6e35a8}.lesson h3{font-size:1.03rem;margin:0}.lesson small{color:var(--muted);font-weight:700}.lesson details{margin-top:auto;border-top:1px solid var(--line);padding-top:9px}.lesson summary{font-weight:850;cursor:pointer}.lesson ol{padding-left:19px;color:var(--muted);line-height:1.5;font-size:.9rem}.done{border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px;font-weight:850}.done.ok{background:#e5f8ed;color:#176d45;border-color:#bce6cd}.empty{display:none;padding:28px;text-align:center;color:var(--muted)}.path{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.step{background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px}.num{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:var(--yellow);font-weight:950}.step h3{margin:12px 0 7px}.step p{margin:0;color:var(--muted);line-height:1.55}.studio{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:15px;box-shadow:var(--shadow)}.tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:10px}.tool{border:1px solid var(--line);background:#fff;border-radius:10px;padding:8px 10px;font-weight:850}.tool.active{background:var(--ink);color:#fff}.canvas-wrap{overflow:hidden;border:1px solid var(--line);border-radius:14px;touch-action:none}canvas{display:block;width:100%;height:420px;background:repeating-linear-gradient(0deg,#fff 0 24px,#eef1f4 25px 26px)}.ai{display:flex;flex-direction:column;min-height:500px}.aihead{display:flex;gap:9px;align-items:center;padding-bottom:11px;border-bottom:1px solid var(--line)}.orb{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:#eee7ff}.aihead small{display:block;color:var(--muted)}.chat{flex:1;max-height:350px;overflow:auto;padding:12px 1px;display:flex;flex-direction:column;gap:8px}.msg{max-width:88%;padding:10px 11px;border-radius:13px;line-height:1.48;font-size:.92rem}.bot{background:#f3f0ec;align-self:flex-start}.user{background:var(--ink);color:#fff;align-self:flex-end}.chat-form{display:flex;gap:7px}.chat-form input{min-width:0;flex:1;border:1px solid var(--line);border-radius:11px;padding:10px}.chat-form button{border:0;border-radius:11px;background:var(--ink);color:#fff;font-weight:900;padding:0 13px}.note{font-size:.76rem;color:var(--muted);line-height:1.45;margin-top:9px}.modal{position:fixed;inset:0;z-index:80;background:rgba(29,27,25,.55);display:none;align-items:center;justify-content:center;padding:18px}.modal.open{display:flex}.dialog{width:min(430px,100%);background:#fff;border-radius:22px;padding:22px}.dialog-head{display:flex;justify-content:space-between;align-items:center}.dialog h2{margin:0}.close{border:0;background:#f2eee8;width:36px;height:36px;border-radius:10px;font-size:20px}.form{display:grid;gap:10px;margin-top:17px}.form label{font-weight:800}.form input{display:block;width:100%;margin-top:5px;border:1px solid var(--line);border-radius:11px;padding:11px}.profile{display:none;margin-top:16px;background:#f6f2ec;border-radius:14px;padding:14px}.profile.show{display:block}.profile span{display:block;color:var(--muted);font-size:.9rem}.logout{margin-top:10px;border:0;background:#ffe5e5;color:#983636;border-radius:9px;padding:8px 10px;font-weight:850}.small{font-size:.76rem;color:var(--muted);line-height:1.5}.toast{position:fixed;right:14px;bottom:14px;z-index:100;background:var(--ink);color:#fff;padding:10px 13px;border-radius:12px;display:none}.toast.show{display:block}footer{text-align:center;color:var(--muted);padding:28px 0 40px}@media(max-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:850px){.hero{grid-template-columns:1fr}.grid{grid-template-columns:repeat(2,1fr)}.studio{grid-template-columns:1fr}.path{grid-template-columns:repeat(2,1fr)}.links{display:none}}@media(max-width:620px){.hero{padding-top:46px}.grid,.path,.stats{grid-template-columns:1fr}.head{align-items:start;flex-direction:column}.builder{grid-template-columns:1fr}.builder-fields{grid-template-columns:1fr}.paper{min-height:280px}canvas{height:360px}.account{padding:9px 10px}}
+</style>
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <a class="brand" href="#inicio" aria-label="Página inicial">
-        <span class="brand-mark">▶</span>
-        <span>Minha Galeria</span>
-      </a>
-      <nav aria-label="Navegação principal">
-        <ul>
-          <li><a href="#fotos">Fotos</a></li>
-          <li><a href="#videos">Vídeos</a></li>
-        </ul>
-      </nav>
-    </div>
-  </header>
-
-  <main id="inicio">
-    <div class="container hero">
-      <span class="badge">📸 Fotos • 🎬 Vídeos</span>
-      <h1>Momentos que merecem <span class="gradient-text">ficar guardados.</span></h1>
-      <p>Uma galeria moderna para reunir fotos e vídeos em um só lugar, com visual adaptado para celular e computador.</p>
-      <div class="filters" aria-label="Filtros da galeria">
-        <button class="filter-btn active" data-filter="all">Tudo</button>
-        <button class="filter-btn" data-filter="photo">Fotos</button>
-        <button class="filter-btn" data-filter="video">Vídeos</button>
-      </div>
-    </div>
-
-    <section id="fotos" class="container media-section" data-kind="photo">
-      <div class="section-head">
-        <div>
-          <h2>Fotos</h2>
-          <p>Alguns destaques da galeria.</p>
-        </div>
-      </div>
-
-      <div class="gallery">
-        <article class="card photo filter-item" data-type="photo">
-          <img src="https://picsum.photos/seed/galeria1/1200/800" alt="Foto de destaque da galeria" loading="lazy" />
-          <div class="overlay"><strong>Momento especial</strong><span>Foto em destaque</span></div>
-        </article>
-        <article class="card photo filter-item" data-type="photo">
-          <img src="https://picsum.photos/seed/galeria2/900/1100" alt="Segunda foto da galeria" loading="lazy" />
-          <div class="overlay"><strong>Um novo registro</strong><span>Minha galeria</span></div>
-        </article>
-        <article class="card photo filter-item" data-type="photo">
-          <img src="https://picsum.photos/seed/galeria3/800/800" alt="Terceira foto da galeria" loading="lazy" />
-          <div class="overlay"><strong>Detalhes</strong><span>Fotografia</span></div>
-        </article>
-        <article class="card photo filter-item" data-type="photo">
-          <img src="https://picsum.photos/seed/galeria4/800/800" alt="Quarta foto da galeria" loading="lazy" />
-          <div class="overlay"><strong>Lembranças</strong><span>Fotografia</span></div>
-        </article>
-        <article class="card photo filter-item" data-type="photo">
-          <img src="https://picsum.photos/seed/galeria5/800/800" alt="Quinta foto da galeria" loading="lazy" />
-          <div class="overlay"><strong>Favoritos</strong><span>Fotografia</span></div>
-        </article>
-      </div>
-    </section>
-
-    <section id="videos" class="container media-section" data-kind="video">
-      <div class="section-head">
-        <div>
-          <h2>Vídeos</h2>
-          <p>Reproduza diretamente no site.</p>
-        </div>
-      </div>
-
-      <div class="videos">
-        <article class="video-card filter-item" data-type="video">
-          <video controls preload="metadata" playsinline>
-            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
-            Seu navegador não consegue reproduzir este vídeo.
-          </video>
-          <div class="video-info">
-            <h3>Vídeo em destaque</h3>
-            <p>Exemplo de reprodução em MP4.</p>
-          </div>
-        </article>
-
-        <article class="video-card filter-item" data-type="video">
-          <video controls preload="metadata" playsinline>
-            <source src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4" type="video/mp4" />
-            Seu navegador não consegue reproduzir este vídeo.
-          </video>
-          <div class="video-info">
-            <h3>Segundo vídeo</h3>
-            <p>Troque este endereço pelo seu próprio arquivo.</p>
-          </div>
-        </article>
-      </div>
-
-      <div class="notice">
-        <strong>Como colocar suas próprias mídias:</strong> envie as fotos e vídeos para o repositório e substitua os endereços <code>src</code> deste arquivo pelos caminhos dos seus arquivos, como <code>media/foto1.jpg</code> ou <code>media/video1.mp4</code>.
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="container">Minha Galeria • Feito para GitHub Pages</div>
-  </footer>
-
-  <script>
-    const buttons = document.querySelectorAll('.filter-btn');
-    const photoSection = document.querySelector('#fotos');
-    const videoSection = document.querySelector('#videos');
-
-    buttons.forEach(button => {
-      button.addEventListener('click', () => {
-        buttons.forEach(btn => btn.classList.remove('active'));
-        button.classList.add('active');
-
-        const filter = button.dataset.filter;
-        photoSection.style.display = filter === 'video' ? 'none' : '';
-        videoSection.style.display = filter === 'photo' ? 'none' : '';
-      });
-    });
-  </script>
+<header><div class="wrap nav"><a class="brand" href="#inicio"><span class="logo"><span>✏️</span></span><span>Desenhos.net</span></a><div class="right"><nav class="links"><a href="#catalogo">Catálogo</a><a href="#caminho">Aprender</a><a href="#praticar">Praticar</a><a href="#ia">Assistente</a></nav><button class="account" id="accountBtn">Entrar</button></div></div></header>
+<main id="inicio">
+<div class="wrap hero"><div><span class="badge">✍️ Do primeiro risco a praticamente qualquer tema</span><h1>Aprenda a desenhar <span style="text-decoration:underline;text-decoration-color:var(--orange);text-decoration-thickness:7px">qualquer coisa.</span></h1><p>O <strong>Desenhos.net</strong> reúne centenas de ideias organizadas por categoria e dificuldade. Se o desenho que você quer não estiver no catálogo, digite o tema e o site monta um roteiro de construção para começar.</p><div class="actions"><a class="btn primary" href="#catalogo">Explorar desenhos</a><a class="btn light" href="#praticar">Abrir estúdio</a></div><div class="stats"><div class="stat"><strong id="totalCount">0</strong><span>temas no catálogo</span></div><div class="stat"><strong>3</strong><span>níveis de dificuldade</span></div><div class="stat"><strong>∞</strong><span>temas personalizados</span></div></div></div><div class="paper"><span class="d d1">🐯</span><span class="d d2">🏎️</span><span class="d d3">🏰</span><span class="d d4">🌌</span></div></div>
+<section id="caminho"><div class="wrap"><div class="head"><div><h2>Como aprender</h2><p>Quase todo desenho complexo pode ser construído a partir de formas simples, proporção, volume e acabamento.</p></div></div><div class="path"><article class="step"><div class="num">1</div><h3>Observe</h3><p>Identifique silhueta, ângulo principal e proporções grandes.</p></article><article class="step"><div class="num">2</div><h3>Construa</h3><p>Transforme o tema em círculos, caixas, cilindros e linhas de ação.</p></article><article class="step"><div class="num">3</div><h3>Dê volume</h3><p>Corrija perspectiva, sobreposição, luz e sombra.</p></article><article class="step"><div class="num">4</div><h3>Finalize</h3><p>Refine contorno, textura e detalhes sem perder as formas principais.</p></article></div></div></section>
+<section id="catalogo"><div class="wrap"><div class="head"><div><h2>Catálogo de desenhos</h2><p>Pesquise animais, pessoas, objetos, veículos, natureza, comida, fantasia, arquitetura, símbolos, estilos e muito mais.</p></div></div><div class="builder"><div><h3>Não encontrou? Crie um passo a passo para qualquer tema</h3><p>Exemplo: “trator”, “castelo flutuante”, “meu cachorro”, “robô jogador de futebol”.</p><div class="builder-fields"><input id="customSubject" maxlength="80" placeholder="O que você quer desenhar?"><select id="customLevel"><option value="easy">Fácil</option><option value="medium">Médio</option><option value="hard">Difícil</option></select></div></div><button id="makePlan">Criar roteiro</button></div><div class="custom-plan" id="customPlan"></div><div class="toolbar"><input class="search" id="search" type="search" placeholder="Pesquisar desenho..."><div class="chips"><button class="chip active" data-level="all">Todos</button><button class="chip" data-level="easy">Fácil</button><button class="chip" data-level="medium">Médio</button><button class="chip" data-level="hard">Difícil</button></div></div><div class="categories" id="categories"></div><div class="grid" id="lessons"></div><div class="empty" id="empty">Nenhum tema encontrado. Use “Quero desenhar...” acima para criar um roteiro.</div></div></section>
+<section id="praticar"><div class="wrap"><div class="head"><div><h2>Estúdio de prática</h2><p>Rascunhe com dedo, mouse ou caneta. Seu perfil também pode guardar quais temas você concluiu.</p></div></div><div class="studio"><div class="card"><div class="tools"><button class="tool active" id="pencil">✏️ Lápis</button><button class="tool" id="eraser">🧽 Borracha</button><button class="tool" id="clear">Limpar</button><label>Tamanho <input id="size" type="range" min="1" max="24" value="4"></label></div><div class="canvas-wrap"><canvas id="board"></canvas></div></div><aside class="card ai" id="ia"><div class="aihead"><div class="orb">✨</div><div><strong>Assistente do Desenhos.net</strong><small>Dicas locais de construção e técnica</small></div></div><div class="chat" id="chat"><div class="msg bot">Pergunte algo como “como desenhar mãos?”, “como fazer sombra?”, “como desenhar um carro?” ou “como melhorar perspectiva?”.</div></div><form class="chat-form" id="chatForm"><input id="question" autocomplete="off" placeholder="Digite sua dúvida..."><button>Enviar</button></form><div class="note">Esta versão responde com uma base local de técnicas. Uma IA generativa real precisa de uma API protegida em servidor; colocar chave secreta diretamente no GitHub Pages não é seguro.</div></aside></div></div></section>
+</main>
+<footer><div class="wrap"><strong>Desenhos.net</strong> • Catálogo amplo + roteiro para qualquer tema</div></footer>
+<div class="modal" id="loginModal"><div class="dialog"><div class="dialog-head"><h2>Seu perfil</h2><button class="close" id="closeModal">×</button></div><form class="form" id="loginForm"><label>Nome<input id="loginName" required maxlength="40" placeholder="Seu nome"></label><label>E-mail<input id="loginEmail" required type="email" maxlength="80" placeholder="voce@exemplo.com"></label><button class="btn primary">Entrar / criar perfil</button></form><div class="profile" id="profileBox"><strong id="profileName"></strong><span id="profileEmail"></span><button class="logout" id="logoutBtn">Sair do perfil</button></div><p class="small">Login local demonstrativo: dados e progresso ficam neste navegador. Não digite senha. Para contas seguras entre dispositivos é necessário um serviço de autenticação.</p></div></div><div class="toast" id="toast"></div>
+<script>
+const categoryData=[
+{name:'Fundamentos',icon:'✏️',level:'easy',subjects:'linhas retas|linhas curvas|círculo|oval|quadrado|retângulo|triângulo|cubo|esfera|cilindro|cone|pirâmide|formas orgânicas|contorno|gesto|hachura|textura|volume básico|luz e sombra|escala de valores|composição simples|perspectiva de 1 ponto|perspectiva de 2 pontos|perspectiva de 3 pontos'},
+{name:'Rosto e corpo',icon:'🙂',level:'medium',subjects:'rosto de frente|rosto de perfil|rosto em 3/4|olho|olhos realistas|nariz|boca|lábios|orelha|cabelo curto|cabelo longo|cabelo cacheado|barba|expressão feliz|expressão triste|expressão brava|expressão surpresa|cabeça humana|pescoço|ombros|torso|braço|mão|mãos em poses|dedos|perna|pé|pés em perspectiva|corpo humano|pose em pé|pose sentada|pose correndo|pose pulando|criança|adulto|idoso|retrato realista|caricatura'},
+{name:'Animais',icon:'🐾',level:'medium',subjects:'gato|gatinho|cachorro|filhote de cachorro|lobo|raposa|leão|leoa|tigre|onça|guepardo|urso|urso polar|panda|coelho|hamster|rato|esquilo|cavalo|potro|vaca|touro|porco|ovelha|cabra|veado|girafa|zebra|elefante|rinoceronte|hipopótamo|macaco|gorila|chimpanzé|canguru|koala|preguiça|ouriço|morcego|lontra|foca|golfinho|baleia|tubarão|peixe|peixe-palhaço|polvo|água-viva|caranguejo|tartaruga|jacaré|crocodilo|cobra|lagarto|camaleão|sapo|borboleta|abelha|joaninha|formiga|aranha|águia|falcão|coruja|papagaio|tucano|pinguim|pato|galinha|galo|cisne|flamingo'},
+{name:'Natureza',icon:'🌿',level:'easy',subjects:'árvore|pinheiro|coqueiro|floresta|arbusto|grama|folha|folha de monstera|flor|rosa|girassol|tulipa|orquídea|cacto|cogumelo|montanha|montanhas nevadas|colina|pedra|rocha|caverna|rio|cachoeira|lago|mar|onda|praia|ilha|deserto|nuvem|chuva|tempestade|raio|neve|floco de neve|sol|lua|lua crescente|estrela|céu noturno|galáxia|planeta|terra|saturno'},
+{name:'Objetos',icon:'🎒',level:'easy',subjects:'lápis|caneta|borracha|caderno|livro|mochila|tesoura|régua|garrafa|copo|caneca|prato|colher|garfo|faca de cozinha|panela|cadeira|mesa|sofá|cama|abajur|relógio|óculos|chave|cadeado|guarda-chuva|sapato|tênis|boné|chapéu|camiseta|calça|vestido|bolsa|carteira|celular|tablet|notebook|computador|teclado|mouse|fone de ouvido|câmera|televisão|controle de videogame|violão|guitarra|piano|bateria|bola de futebol|bola de basquete|troféu'},
+{name:'Veículos',icon:'🚗',level:'medium',subjects:'carro|carro esportivo|carro antigo|carro de corrida|fórmula 1|picape|SUV|jipe|van|ônibus|caminhão|trator|moto|moto esportiva|bicicleta|skate|patinete|trem|metrô|bonde|avião|jato|helicóptero|foguete|nave espacial|barco|lancha|navio|submarino'},
+{name:'Comida',icon:'🍕',level:'easy',subjects:'maçã|banana|laranja|limão|morango|uva|melancia|abacaxi|manga|cereja|pera|pêssego|abacate|tomate|cenoura|milho|abóbora|pimenta|pão|croissant|bolo|cupcake|donut|biscoito|sorvete|pizza|hambúrguer|batata frita|hot dog|sanduíche|taco|sushi|ramen|macarrão|ovo frito|panqueca|chocolate|pirulito|café|suco'},
+{name:'Arquitetura',icon:'🏠',level:'medium',subjects:'casa simples|casa moderna|casa de campo|cabana|prédio|arranha-céu|cidade|rua|ponte|farol|igreja|catedral|castelo|palácio|torre|moinho|celeiro|porta|janela|escada|quarto|sala|cozinha|fachada|loja|escola|estádio'},
+{name:'Fantasia',icon:'🐉',level:'hard',subjects:'dragão|dragão bebê|unicórnio|fênix|grifo|sereia|centauro|fada|elfo|anão fantástico|mago|bruxa|cavaleiro|guerreiro|arqueiro|rei|rainha|princesa|príncipe|pirata|ninja|samurai|robô|androide|monstro|zumbi cartunesco|fantasma|alienígena|OVNI|espada mágica|escudo|armadura|castelo flutuante|ilha flutuante|portal mágico|criatura marinha fantástica'},
+{name:'Símbolos e fofos',icon:'💖',level:'easy',subjects:'coração|estrela fofa|nuvem fofa|carinha feliz|emoji feliz|emoji triste|emoji apaixonado|arco-íris|coroa|diamante|presente|balão|laço|vela|flor kawaii|gato kawaii|cachorro kawaii|urso kawaii|coelho kawaii|comida kawaii|planeta kawaii|fantasma fofo'},
+{name:'Estilos',icon:'🎨',level:'hard',subjects:'cartoon|mangá|anime|chibi|kawaii|pixel art|realismo|semirrealismo|caricatura|line art|silhueta|desenho minimalista|desenho geométrico|grafite|pontilhismo|aquarela simulada|quadrinhos|concept art|personagem estilizado|cenário estilizado'},
+{name:'Cenas',icon:'🖼️',level:'hard',subjects:'pôr do sol|nascer do sol|paisagem de montanha|paisagem de praia|paisagem de campo|paisagem urbana|cidade à noite|rua em perspectiva|quarto em perspectiva|floresta encantada|tempestade no mar|acampamento|fazenda|parque|praça|estação de trem|campo de futebol|jogo de futebol|corrida de carros|batalha fantástica|exploração espacial|fundo do mar|mundo pós-apocalíptico estilizado|vilarejo medieval|cidade futurista'}
+];
+const stepsByCategory={
+'Fundamentos':['Faça traços leves e grandes para definir a direção.','Construa a forma sem tentar acertar de primeira.','Repita várias vezes variando ângulo e tamanho.','Ajuste proporção e limpeza dos contornos.','Finalize com valor, textura ou sombra simples.'],
+'Rosto e corpo':['Comece pela linha de ação e pelos volumes maiores.','Marque eixos e proporções antes dos detalhes.','Construa as partes com esferas, caixas e cilindros.','Confira simetria, sobreposição e perspectiva.','Refine anatomia, contorno e sombras.'],
+'Animais':['Marque cabeça, caixa torácica e quadril com formas simples.','Trace a linha da coluna e a direção das pernas.','Adicione focinho, orelhas, patas, cauda ou asas conforme o animal.','Corrija a silhueta usando referência real.','Finalize pelo, penas, escamas e sombras sem exagerar detalhes.'],
+'Natureza':['Comece pelas grandes massas e pela direção principal.','Quebre a forma em grupos menores, evitando detalhes repetidos demais.','Defina primeiro plano, meio e fundo quando houver profundidade.','Escolha uma direção de luz.','Finalize com textura e variação de bordas.'],
+'Objetos':['Desenhe uma caixa ou forma simples que contenha o objeto.','Marque eixo, inclinação e proporções principais.','Construa espessura, curvas e partes secundárias.','Corrija perspectiva e simetria.','Adicione detalhes, material, luz e sombra.'],
+'Veículos':['Trace a linha do chão e o ângulo geral do veículo.','Construa o corpo principal como uma caixa em perspectiva.','Marque rodas ou pontos estruturais antes de detalhes.','Adicione cabine, faróis, portas, asas ou partes específicas.','Refine curvas, reflexos e sombras mantendo a perspectiva.'],
+'Comida':['Use formas geométricas para o volume principal.','Marque cortes, camadas e partes sobrepostas.','Varie o contorno para parecer mais natural.','Escolha a luz e separe áreas claras e escuras.','Adicione textura com poucos detalhes bem colocados.'],
+'Arquitetura':['Defina linha do horizonte e pontos de fuga.','Construa o volume principal como caixas em perspectiva.','Divida portas, janelas, andares e grandes massas.','Repita elementos seguindo as linhas de fuga.','Finalize materiais, sombras e detalhes de escala.'],
+'Fantasia':['Defina uma silhueta clara e uma ideia principal.','Use referências reais para a estrutura de corpo, roupa ou objeto.','Construa volumes antes de detalhes mágicos ou decorativos.','Exagere uma característica para dar personalidade.','Finalize textura, luz, acessórios e efeitos.'],
+'Símbolos e fofos':['Comece com formas arredondadas e simples.','Use simetria ou eixos leves quando necessário.','Mantenha poucos detalhes e leitura clara.','Adicione expressão ou pequenos elementos decorativos.','Contorne e aplique sombras bem suaves.'],
+'Estilos':['Construa primeiro a forma correta sem pensar no estilo.','Escolha quais proporções serão simplificadas ou exageradas.','Defina o tipo de linha e nível de detalhe.','Aplique sombras e texturas coerentes com o estilo.','Faça uma segunda versão para comparar e refinar sua linguagem visual.'],
+'Cenas':['Defina horizonte, enquadramento e ponto focal.','Separe primeiro plano, meio e fundo.','Construa os grandes volumes em perspectiva.','Organize luz e contraste para guiar o olhar.','Adicione personagens, objetos e detalhes por último.']
+};
+function slug(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1)}
+const lessons=[];categoryData.forEach(c=>c.subjects.split('|').forEach((s,i)=>lessons.push({id:slug(c.name+'-'+s),title:cap(s),category:c.name,icon:c.icon,level:i%7===6?(c.level==='easy'?'medium':'hard'):c.level,steps:stepsByCategory[c.name]})));
+document.getElementById('totalCount').textContent=lessons.length+'+';
+const lessonsEl=document.getElementById('lessons'),search=document.getElementById('search'),empty=document.getElementById('empty'),cats=document.getElementById('categories');let activeLevel='all',activeCategory='Todos';
+function getUser(){try{return JSON.parse(localStorage.getItem('desenhosUser'))}catch{return null}}function progressKey(){const u=getUser();return u?'desenhosProgress:'+u.email:null}function getProgress(){const k=progressKey();if(!k)return[];try{return JSON.parse(localStorage.getItem(k))||[]}catch{return[]}}function saveProgress(v){const k=progressKey();if(k)localStorage.setItem(k,JSON.stringify(v))}function levelLabel(l){return l==='easy'?'Fácil':l==='medium'?'Médio':'Difícil'}
+function renderCategories(){cats.innerHTML=['Todos',...categoryData.map(c=>c.name)].map(n=>`<button class="cat ${n===activeCategory?'active':''}" data-cat="${n}">${n}</button>`).join('');cats.querySelectorAll('.cat').forEach(b=>b.onclick=()=>{activeCategory=b.dataset.cat;renderCategories();render()})}
+function render(){const q=search.value.trim().toLowerCase(),done=getProgress();const list=lessons.filter(x=>(activeLevel==='all'||x.level===activeLevel)&&(activeCategory==='Todos'||x.category===activeCategory)&&(`${x.title} ${x.category}`.toLowerCase().includes(q)));lessonsEl.innerHTML=list.map(x=>`<article class="lesson"><div class="lesson-top"><div class="icon">${x.icon}</div><span class="level ${x.level}">${levelLabel(x.level)}</span></div><h3>${x.title}</h3><small>${x.category}</small><details><summary>Ver passo a passo</summary><ol>${x.steps.map(s=>`<li>${s}</li>`).join('')}</ol></details><button class="done ${done.includes(x.id)?'ok':''}" data-id="${x.id}">${done.includes(x.id)?'✓ Concluído':'Marcar como concluído'}</button></article>`).join('');empty.style.display=list.length?'none':'block';lessonsEl.querySelectorAll('.done').forEach(b=>b.onclick=()=>toggleDone(b.dataset.id))}
+function toggleDone(id){if(!getUser()){openLogin();toast('Entre no perfil para salvar seu progresso.');return}let p=getProgress();p=p.includes(id)?p.filter(x=>x!==id):[...p,id];saveProgress(p);render()}
+search.addEventListener('input',render);document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{document.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));b.classList.add('active');activeLevel=b.dataset.level;render()});
+const customSubject=document.getElementById('customSubject'),customLevel=document.getElementById('customLevel'),customPlan=document.getElementById('customPlan');document.getElementById('makePlan').onclick=()=>{const s=customSubject.value.trim();if(!s){toast('Digite o que você quer desenhar.');return}const l=customLevel.value;const steps=l==='easy'?['Desenhe a silhueta usando 2 ou 3 formas simples.','Marque o eixo e as proporções principais.','Una as formas com linhas leves.','Apague guias desnecessárias e refine o contorno.','Adicione poucos detalhes e uma sombra simples.']:l==='medium'?['Observe uma referência e identifique as formas maiores.','Construa o tema em perspectiva com círculos, caixas e cilindros.','Compare proporções e espaços negativos.','Defina uma fonte de luz e modele os volumes.','Refine textura e detalhes sem perder a forma principal.']:['Reúna 2 ou 3 referências do tema e escolha um ângulo claro.','Faça estudos rápidos de silhueta e composição.','Construa volumes completos em perspectiva antes de detalhar.','Corrija proporções, anatomia ou mecânica comparando com referência.','Organize luz, valores e bordas.','Finalize detalhes seletivos e faça uma revisão geral de leitura.'];customPlan.innerHTML='';const h=document.createElement('h3');h.textContent='Roteiro para desenhar: '+s;const ol=document.createElement('ol');steps.forEach(t=>{const li=document.createElement('li');li.textContent=t;ol.appendChild(li)});customPlan.append(h,ol);customPlan.classList.add('show');customPlan.scrollIntoView({behavior:'smooth',block:'nearest'})};
+const board=document.getElementById('board'),ctx=board.getContext('2d'),size=document.getElementById('size');let drawing=false,eraser=false,last=null;function fit(){const r=board.getBoundingClientRect(),dpr=Math.max(1,devicePixelRatio||1);board.width=Math.round(r.width*dpr);board.height=Math.round(r.height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);ctx.lineCap='round';ctx.lineJoin='round'}function pos(e){const r=board.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}board.addEventListener('pointerdown',e=>{drawing=true;last=pos(e);board.setPointerCapture(e.pointerId)});board.addEventListener('pointermove',e=>{if(!drawing)return;const p=pos(e);ctx.globalCompositeOperation=eraser?'destination-out':'source-over';ctx.strokeStyle='#1d1b19';ctx.lineWidth=eraser?Number(size.value)*2.5:Number(size.value);ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(p.x,p.y);ctx.stroke();last=p});['pointerup','pointercancel','pointerleave'].forEach(ev=>board.addEventListener(ev,()=>{drawing=false;last=null}));document.getElementById('pencil').onclick=()=>{eraser=false;document.getElementById('pencil').classList.add('active');document.getElementById('eraser').classList.remove('active')};document.getElementById('eraser').onclick=()=>{eraser=true;document.getElementById('eraser').classList.add('active');document.getElementById('pencil').classList.remove('active')};document.getElementById('clear').onclick=()=>ctx.clearRect(0,0,board.width,board.height);requestAnimationFrame(fit);
+const answers=[{k:'rosto face retrato',t:'Para rosto, construa crânio e mandíbula, marque eixo central e linhas de olhos, nariz e boca. Compare proporções antes de detalhar.'},{k:'mao mão maos mãos dedo',t:'Simplifique a palma como uma caixa e os dedos como segmentos. Marque o arco dos nós dos dedos antes de refinar.'},{k:'olho olhos',t:'Desenhe primeiro a abertura do olho, depois íris e pupila. A pálpebra cobre parte da íris; observe a inclinação em vez de desenhar um símbolo de olho.'},{k:'perspectiva fuga profundidade prédio casa carro',t:'Defina horizonte e pontos de fuga. Construa primeiro com caixas; curvas e detalhes vêm depois.'},{k:'sombra luz volume sombrear',t:'Escolha uma fonte de luz, separe lado iluminado e lado em sombra e adicione sombra projetada. O contraste deve explicar a forma.'},{k:'animal gato cachorro cavalo tigre leao leão',t:'Comece por cabeça, tórax e quadril em formas simples. Ligue com coluna e membros e só depois refine a silhueta e a textura.'},{k:'anime manga mangá chibi cartoon',t:'Construa a anatomia básica primeiro; depois estilize proporções, olhos, cabelo e linha. O estilo funciona melhor sobre uma estrutura consistente.'},{k:'treinar melhorar praticar evoluir',t:'Treine uma habilidade por sessão: linhas, formas, perspectiva, construção ou valores. Faça várias tentativas curtas e compare os erros.'}];const chat=document.getElementById('chat'),question=document.getElementById('question');function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}function addMsg(t,c){const d=document.createElement('div');d.className='msg '+c;d.textContent=t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}document.getElementById('chatForm').onsubmit=e=>{e.preventDefault();const q=question.value.trim();if(!q)return;addMsg(q,'user');question.value='';const n=norm(q),a=answers.find(x=>x.k.split(' ').some(k=>n.includes(norm(k))));setTimeout(()=>addMsg(a?a.t:'Para esse tema, comece pela silhueta, transforme-o em formas simples, confira proporções e perspectiva, depois acrescente luz, sombra e detalhes. Você também pode digitar o tema na ferramenta “Quero desenhar...” para receber um roteiro.','bot'),150)};
+const modal=document.getElementById('loginModal'),accountBtn=document.getElementById('accountBtn'),loginForm=document.getElementById('loginForm'),profileBox=document.getElementById('profileBox');function openLogin(){syncProfile();modal.classList.add('open')}function closeLogin(){modal.classList.remove('open')}function syncProfile(){const u=getUser();if(u){loginForm.style.display='none';profileBox.classList.add('show');document.getElementById('profileName').textContent=u.name;document.getElementById('profileEmail').textContent=u.email;accountBtn.textContent='👤 '+u.name.split(' ')[0]}else{loginForm.style.display='grid';profileBox.classList.remove('show');accountBtn.textContent='Entrar'}}accountBtn.onclick=openLogin;document.getElementById('closeModal').onclick=closeLogin;modal.onclick=e=>{if(e.target===modal)closeLogin()};loginForm.onsubmit=e=>{e.preventDefault();const name=document.getElementById('loginName').value.trim(),email=document.getElementById('loginEmail').value.trim().toLowerCase();if(!name||!email)return;localStorage.setItem('desenhosUser',JSON.stringify({name,email}));syncProfile();render();toast('Perfil salvo neste navegador.');setTimeout(closeLogin,350)};document.getElementById('logoutBtn').onclick=()=>{localStorage.removeItem('desenhosUser');syncProfile();render();closeLogin();toast('Você saiu do perfil.')};const toastEl=document.getElementById('toast');let tt;function toast(t){toastEl.textContent=t;toastEl.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>toastEl.classList.remove('show'),2300)}renderCategories();syncProfile();render();
+</script>
 </body>
 </html>
