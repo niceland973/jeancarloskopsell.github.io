@@ -45,10 +45,10 @@ function roadsidePost(x,z){const g=new THREE.Group();const pole=new THREE.Mesh(n
 function tree(x,z){const g=new THREE.Group();const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.12,.18,1.2,7),mat(0x57412d));trunk.position.y=.6;g.add(trunk);for(let i=0;i<3;i++){const cone=new THREE.Mesh(new THREE.ConeGeometry(1.0-i*.18,1.65,7),mat(i===1?0x2b6344:0x347552));cone.position.y=1.25+i*.65;g.add(cone)}g.position.set(x,0,z);g.scale.setScalar(.8+Math.random()*.65);scene.add(g);scenery.push(g)}
 for(let z=-400;z<20;z+=13){tree(-10-Math.random()*5,z);tree(10+Math.random()*5,z-5)}
 for(let z=-395;z<20;z+=28){roadsidePost(-7,z);roadsidePost(7,z-12)}
-const carSpecs={Gol:{color:0x22aaff,w:1.58,h:.53,l:2.85,cw:1.16,cl:1.28,zero100:10.8},Onix:{color:0xe83e36,w:1.62,h:.54,l:3.05,cw:1.2,cl:1.42,zero100:10.2},Strada:{color:0xf1f1e8,w:1.72,h:.62,l:3.25,cw:1.22,cl:1.35,pickup:true,zero100:12.1},'T-Cross':{color:0x303943,w:1.75,h:.62,l:3.25,cw:1.3,cl:1.5,suv:true,zero100:10.4},Argo:{color:0xf5b82e,w:1.6,h:.54,l:2.95,cw:1.18,cl:1.3,zero100:11.0},Corolla:{color:0xeeeeee,w:1.72,h:.5,l:3.35,cw:1.28,cl:1.55,sedan:true,zero100:9.5}};
+const carSpecs={Gol:{color:0x22aaff,w:1.58,h:.53,l:2.85,cw:1.16,cl:1.28,zero100:10.8,mass:1050,drag:.32,traction:.91},Onix:{color:0xe83e36,w:1.62,h:.54,l:3.05,cw:1.2,cl:1.42,zero100:10.2,mass:1120,drag:.30,traction:.92},Strada:{color:0xf1f1e8,w:1.72,h:.62,l:3.25,cw:1.22,cl:1.35,pickup:true,zero100:12.1,mass:1250,drag:.36,traction:.86},'T-Cross':{color:0x303943,w:1.75,h:.62,l:3.25,cw:1.3,cl:1.5,suv:true,zero100:10.4,mass:1280,drag:.35,traction:.89},Argo:{color:0xf5b82e,w:1.6,h:.54,l:2.95,cw:1.18,cl:1.3,zero100:11.0,mass:1080,drag:.32,traction:.9},Corolla:{color:0xeeeeee,w:1.72,h:.5,l:3.35,cw:1.28,cl:1.55,sedan:true,zero100:9.5,mass:1370,drag:.29,traction:.94}};
 function makeCar(model='Gol'){
  const spec=carSpecs[model]||carSpecs.Gol,g=new THREE.Group(),w=spec.w,l=spec.l;
- const paint=mat(spec.color,.28,.24),glass=mat(0x193142,.18,.22),rubber=mat(0x101419,.82),chrome=mat(0x9aa8b0,.25,.8);
+ const paint=new THREE.MeshPhysicalMaterial({color:spec.color,roughness:.24,metalness:.32,clearcoat:.85,clearcoatRoughness:.18}),glass=new THREE.MeshPhysicalMaterial({color:0x193142,roughness:.12,metalness:.18,transmission:.08,clearcoat:.8}),rubber=mat(0x101419,.88),chrome=mat(0x9aa8b0,.22,.85);
  // Carroceria com volumes separados para capô, teto, para-choques e porta-malas.
  const lower=new THREE.Mesh(new THREE.BoxGeometry(w,.34,l),paint);lower.position.y=.65;lower.castShadow=true;g.add(lower);
  const hood=new THREE.Mesh(new THREE.BoxGeometry(w*.91,.18,l*.29),paint);hood.position.set(0,.82,l*.32);hood.castShadow=true;g.add(hood);
@@ -92,19 +92,23 @@ hold('left','arrowleft');hold('right','arrowright');hold('gas','arrowup');hold('
 function update(dt){if(!running)return;
 const accelerating=keys.w||keys.arrowup,braking=keys.s||keys.arrowdown;
 const spec=carSpecs[document.querySelector("#carSelect").value]||carSpecs.Gol;
-// Aceleração, arrasto, freio e trocas de marcha aproximados.
-const accelScale=100/(spec.zero100*2.05);
-if(accelerating&&!braking&&speed<100){elapsed+=dt;let gearLoss=1;if(speed>29&&speed<34||speed>64&&speed<69)gearLoss=.78;const drag=.018+speed*.00055;speed=Math.min(100,speed+Math.max(.7,accelScale-drag)*gearLoss*dt);}
-else if(braking){speed=Math.max(0,speed-62*dt);elapsed+=dt;}
-else if(speed>0){speed=Math.max(0,speed-(.9+speed*.025)*dt);elapsed+=dt;}
+// Modelo simplificado com massa, força de tração, arrasto aerodinâmico e resistência ao rolamento.
+const mass=spec.mass||1150,dragCoefficient=spec.drag||.31,traction=spec.traction||.88;
+const vMs=speed/3.6,airDensity=1.225,frontalArea=spec.w*1.35;
+const aeroForce=.5*airDensity*dragCoefficient*frontalArea*vMs*vMs;
+const rollingForce=mass*9.81*.014;
+const engineForce=accelerating?mass*(spec.zero100?27.78/spec.zero100:2.5)*traction:0;
+const netAccel=(engineForce-aeroForce-rollingForce)/mass;
+if(accelerating&&!braking&&speed<100){elapsed+=dt;let gearLoss=(speed>29&&speed<34||speed>64&&speed<69)?.84:1;const dv=Math.max(.12,netAccel*3.6*gearLoss);speed=Math.min(100,speed+dv*dt);}
+else if(braking){speed=Math.max(0,speed-7.2*dt);elapsed+=dt;}
+else if(speed>0){speed=Math.max(0,speed-(.18+speed*.006+aeroForce/mass*3.6)*dt);elapsed+=dt;}
 const move=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0);
-steerVelocity=THREE.MathUtils.damp(steerVelocity,move,5.5,dt);
-const speedFactor=Math.max(.25,1-speed/145);
-player.position.x=THREE.MathUtils.clamp(player.position.x+steerVelocity*dt*(2.8+speed*.014),-4.3,4.3);
-player.rotation.z=THREE.MathUtils.damp(player.rotation.z,-steerVelocity*(.035+speed*.0007),4.2,dt);
-player.rotation.x=THREE.MathUtils.damp(player.rotation.x,(accelerating?-.035:braking?.06:0),2.2,dt);
-player.rotation.y=THREE.MathUtils.damp(player.rotation.y,-steerVelocity*(.06+speed*.0009),3.5,dt);
-for(const wheel of (player.userData.wheels||[])){wheel.rotation.y=enginePhase;}
+const lateralGrip=Math.max(.35,1-speed/155)*traction;
+steerVelocity=THREE.MathUtils.damp(steerVelocity,move*lateralGrip,4.4,dt);
+player.position.x=THREE.MathUtils.clamp(player.position.x+steerVelocity*dt*(2.4+speed*.012),-4.3,4.3);
+player.rotation.z=THREE.MathUtils.damp(player.rotation.z,-steerVelocity*(.035+speed*.0007),3.6,dt);
+player.rotation.x=THREE.MathUtils.damp(player.rotation.x,(accelerating?-.025:braking?.045:0),2.0,dt);
+player.rotation.y=THREE.MathUtils.damp(player.rotation.y,-steerVelocity*(.055+speed*.0008),3.0,dt);
 enginePhase+=dt*(3+speed*.52);const pace=(speed/100)*dt*85;document.querySelector("#speed").textContent=String(Math.round(speed)).padStart(3,"0");document.querySelector("#bar").style.width=speed+"%";document.querySelector("#elapsed").textContent=elapsed.toFixed(2);
 for(const s of stripes){s.position.z+=pace*1.8;if(s.position.z>12)s.position.z-=420}
 for(const t of scenery){t.position.z+=pace*1.8;if(t.position.z>15)t.position.z-=420}
