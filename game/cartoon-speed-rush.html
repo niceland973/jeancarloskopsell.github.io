@@ -18,7 +18,7 @@
 <div id="touch"><button id="left" aria-label="Virar à esquerda">←</button><div class="pedals"><button id="brake" aria-label="Frear">−</button><button id="gas" aria-label="Acelerar">＋</button></div><button id="right" aria-label="Virar à direita">→</button></div>
 <div id="start" class="center"><div class="panel"><h1>DRIVE <em>3D BR</em></h1><p>Escolha seu carro brasileiro e dirija livremente: 0% de obstáculos, sem trânsito e sem barreiras na pista.</p><label for="carSelect" style="display:block;text-align:left;font-size:11px;color:#9fc4d9;letter-spacing:.12em;margin-top:16px">ESCOLHA SEU CARRO</label><select id="carSelect" style="width:100%;padding:13px;margin-top:7px;border-radius:10px;background:#10263a;color:white;border:1px solid #6adcf766;font-size:14px"><option value="Gol">Volkswagen Gol</option><option value="Onix">Chevrolet Onix</option><option value="Strada">Fiat Strada</option><option value="T-Cross">Volkswagen T-Cross</option><option value="Argo">Fiat Argo</option><option value="Corolla">Toyota Corolla</option></select><button id="startBtn" class="btn">DIRIGIR AGORA</button><p class="small">MODO LIVRE · 0% OBSTÁCULOS · ESTRADA INFINITA</p></div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js" onerror="this.onerror=null;this.src=&quot;https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js&quot;"></script>
 <script>
 (()=> {
 const root=document.querySelector('#game');
@@ -48,9 +48,9 @@ function makeCar(model='Gol'){const spec=carSpecs[model]||carSpecs.Gol,g=new THR
 let player=makeCar('Gol');player.position.set(0,0,3);scene.add(player);
 
 const keys={};let running=false,speed=0,distance=0,score=0,last=performance.now();
-let best=Number(localStorage.getItem('neonDriveBest')||0);document.querySelector('#best').textContent=String(best).padStart(5,'0');
+let best=0;try{best=Number(localStorage.getItem('neonDriveBest')||0)}catch(e){best=0}document.querySelector('#best').textContent=String(best).padStart(5,'0');
 function reset(){speed=0;distance=0;score=0;scene.remove(player);player=makeCar(document.querySelector('#carSelect').value);player.position.set(0,0,3);scene.add(player);document.querySelector('#distance').textContent='0.00';document.querySelector('#score').textContent='00000';document.querySelector('#start').classList.add('hidden');running=true;last=performance.now()}
-function saveBest(){if(score>best){best=score;localStorage.setItem('neonDriveBest',String(best));document.querySelector('#best').textContent=String(best).padStart(5,'0')}}
+function saveBest(){if(score>best){best=score;try{localStorage.setItem('neonDriveBest',String(best))}catch(e){}document.querySelector('#best').textContent=String(best).padStart(5,'0')}}
 document.querySelector('#startBtn').addEventListener('click',reset);
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();if((e.key==='Enter'||e.key===' ')&&!running)reset()});
 addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
