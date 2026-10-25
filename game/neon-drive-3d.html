@@ -46,7 +46,37 @@ function tree(x,z){const g=new THREE.Group();const trunk=new THREE.Mesh(new THRE
 for(let z=-400;z<20;z+=13){tree(-10-Math.random()*5,z);tree(10+Math.random()*5,z-5)}
 for(let z=-395;z<20;z+=28){roadsidePost(-7,z);roadsidePost(7,z-12)}
 const carSpecs={Gol:{color:0x22aaff,w:1.58,h:.53,l:2.85,cw:1.16,cl:1.28,zero100:10.8},Onix:{color:0xe83e36,w:1.62,h:.54,l:3.05,cw:1.2,cl:1.42,zero100:10.2},Strada:{color:0xf1f1e8,w:1.72,h:.62,l:3.25,cw:1.22,cl:1.35,pickup:true,zero100:12.1},'T-Cross':{color:0x303943,w:1.75,h:.62,l:3.25,cw:1.3,cl:1.5,suv:true,zero100:10.4},Argo:{color:0xf5b82e,w:1.6,h:.54,l:2.95,cw:1.18,cl:1.3,zero100:11.0},Corolla:{color:0xeeeeee,w:1.72,h:.5,l:3.35,cw:1.28,cl:1.55,sedan:true,zero100:9.5}};
-function makeCar(model='Gol'){const spec=carSpecs[model]||carSpecs.Gol,g=new THREE.Group(),w=spec.w,l=spec.l;const body=new THREE.Mesh(new THREE.BoxGeometry(w,spec.h,l),mat(spec.color,.24,.32));body.position.y=.72;body.castShadow=true;g.add(body);const cabin=new THREE.Mesh(new THREE.BoxGeometry(spec.cw,spec.suv?.64:.5,spec.cl),mat(0x172b3c,.2,.35));cabin.position.set(0,spec.suv?1.3:1.18,-.12);cabin.castShadow=true;g.add(cabin);const windshield=new THREE.Mesh(new THREE.BoxGeometry(spec.cw*.88,.3,.06),new THREE.MeshStandardMaterial({color:0x9bd9e8,metalness:.2,roughness:.16}));windshield.position.set(0,1.28,spec.cl*.5-.03);g.add(windshield);const rearGlass=windshield.clone();rearGlass.position.z=-spec.cl*.5;g.add(rearGlass);if(spec.pickup){const bed=new THREE.Mesh(new THREE.BoxGeometry(w*.82,.22,.85),mat(0x333d46,.65));bed.position.set(0,1.05,-l*.32);g.add(bed)}if(spec.sedan){const trunk=new THREE.Mesh(new THREE.BoxGeometry(w*.92,.2,.55),mat(spec.color,.3,.3));trunk.position.set(0,.96,-l*.42);g.add(trunk)}for(const x of [-w*.36,w*.36]){for(const z of [-l*.32,l*.32]){const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.31,.31,.2,20),mat(0x11151b,.78));wheel.rotation.z=Math.PI/2;wheel.position.set(x,.38,z);wheel.castShadow=true;g.add(wheel);const rim=new THREE.Mesh(new THREE.CylinderGeometry(.19,.19,.205,16),mat(0x9caab4,.28,.78));rim.rotation.z=Math.PI/2;rim.position.copy(wheel.position);g.add(rim);const hub=new THREE.Mesh(new THREE.CylinderGeometry(.065,.065,.212,12),mat(0x303b44,.25,.7));hub.rotation.z=Math.PI/2;hub.position.copy(wheel.position);g.add(hub)}const mirror=new THREE.Mesh(new THREE.BoxGeometry(.16,.12,.2),mat(spec.color,.3,.25));mirror.position.set(x*1.18,1.02,.28);g.add(mirror);const lamp=new THREE.Mesh(new THREE.BoxGeometry(.3,.12,.06),new THREE.MeshBasicMaterial({color:0xfff5d7}));lamp.position.set(x,.76,l*.5+.025);g.add(lamp);const tail=new THREE.Mesh(new THREE.BoxGeometry(.24,.13,.05),new THREE.MeshBasicMaterial({color:0xff302b}));tail.position.set(x,.76,-l*.5-.025);g.add(tail)}const grille=new THREE.Mesh(new THREE.BoxGeometry(w*.32,.16,.035),mat(0x141b22,.5,.2));grille.position.set(0,.66,l*.5+.025);g.add(grille);return g}
+function makeCar(model='Gol'){
+ const spec=carSpecs[model]||carSpecs.Gol,g=new THREE.Group(),w=spec.w,l=spec.l;
+ const paint=mat(spec.color,.28,.24),glass=mat(0x193142,.18,.22),rubber=mat(0x101419,.82),chrome=mat(0x9aa8b0,.25,.8);
+ // Carroceria com volumes separados para capô, teto, para-choques e porta-malas.
+ const lower=new THREE.Mesh(new THREE.BoxGeometry(w,.34,l),paint);lower.position.y=.65;lower.castShadow=true;g.add(lower);
+ const hood=new THREE.Mesh(new THREE.BoxGeometry(w*.91,.18,l*.29),paint);hood.position.set(0,.82,l*.32);hood.castShadow=true;g.add(hood);
+ const rearDeck=new THREE.Mesh(new THREE.BoxGeometry(w*.9,.17,l*.22),paint);rearDeck.position.set(0,.82,-l*.36);g.add(rearDeck);
+ const cabin=new THREE.Mesh(new THREE.BoxGeometry(spec.cw,spec.suv?.62:.48,spec.cl),glass);cabin.position.set(0,spec.suv?1.23:1.13,-.12);cabin.castShadow=true;g.add(cabin);
+ const roof=new THREE.Mesh(new THREE.BoxGeometry(spec.cw*.91,.09,spec.cl*.64),paint);roof.position.set(0,(spec.suv?1.23:1.13)+(spec.suv?.34:.26),-.08);g.add(roof);
+ // Janelas laterais e para-brisa com brilho discreto.
+ for(const side of [-1,1]){
+  const windowMesh=new THREE.Mesh(new THREE.BoxGeometry(.018,.25,spec.cl*.7),mat(0x76a7ba,.22,.15));windowMesh.position.set(side*(spec.cw*.5+.008),spec.suv?1.29:1.17,-.12);g.add(windowMesh);
+  const mirror=new THREE.Mesh(new THREE.BoxGeometry(.15,.1,.17),paint);mirror.position.set(side*(w*.53),.98,.32);g.add(mirror);
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.27,.09,.035),new THREE.MeshStandardMaterial({color:0xfff0c4,emissive:0x33240a,roughness:.25}));head.position.set(side*w*.31,.7,l*.5+.012);g.add(head);
+  const tail=new THREE.Mesh(new THREE.BoxGeometry(.23,.12,.035),new THREE.MeshStandardMaterial({color:0xe52c27,emissive:0x3b0503}));tail.position.set(side*w*.31,.7,-l*.5-.012);g.add(tail);
+  for(const z of [-l*.32,l*.32]){
+   const wheelGroup=new THREE.Group();wheelGroup.position.set(side*w*.39,.36,z);g.add(wheelGroup);
+   const tire=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.2,24),rubber);tire.rotation.z=Math.PI/2;tire.castShadow=true;wheelGroup.add(tire);
+   const rim=new THREE.Mesh(new THREE.CylinderGeometry(.205,.205,.207,20),chrome);rim.rotation.z=Math.PI/2;wheelGroup.add(rim);
+   const hub=new THREE.Mesh(new THREE.CylinderGeometry(.07,.07,.214,12),mat(0x303b44,.3,.7));hub.rotation.z=Math.PI/2;wheelGroup.add(hub);
+   for(let k=0;k<5;k++){const spoke=new THREE.Mesh(new THREE.BoxGeometry(.035,.012,.15),chrome);spoke.position.set(side*.107,0,0);spoke.rotation.x=k*Math.PI/5;wheelGroup.add(spoke)}
+   g.userData.wheels=(g.userData.wheels||[]).concat(wheelGroup);
+  }
+ }
+ const bumperFront=new THREE.Mesh(new THREE.BoxGeometry(w*.92,.13,.12),mat(0x303941,.45,.25));bumperFront.position.set(0,.48,l*.5);g.add(bumperFront);
+ const bumperRear=bumperFront.clone();bumperRear.position.z=-l*.5;g.add(bumperRear);
+ const grille=new THREE.Mesh(new THREE.BoxGeometry(w*.3,.13,.025),mat(0x141b22,.4,.3));grille.position.set(0,.65,l*.5+.02);g.add(grille);
+ if(spec.pickup){const bed=new THREE.Mesh(new THREE.BoxGeometry(w*.8,.12,.82),mat(0x252d34,.65));bed.position.set(0,.87,-l*.31);g.add(bed);for(const side of [-1,1]){const rail=new THREE.Mesh(new THREE.BoxGeometry(.06,.2,.92),paint);rail.position.set(side*w*.39,.95,-l*.31);g.add(rail)}}
+ if(spec.sedan){const trunk=new THREE.Mesh(new THREE.BoxGeometry(w*.88,.15,.52),paint);trunk.position.set(0,.83,-l*.42);g.add(trunk)}
+ return g
+}
 let player=makeCar('Gol');player.position.set(0,0,3);scene.add(player);
 
 const keys={};let running=false,speed=0,elapsed=0,last=performance.now(),best=null,shiftPause=0,shiftIndex=0,steerVelocity=0,enginePhase=0;
@@ -62,17 +92,25 @@ hold('left','arrowleft');hold('right','arrowright');hold('gas','arrowup');hold('
 function update(dt){if(!running)return;
 const accelerating=keys.w||keys.arrowup,braking=keys.s||keys.arrowdown;
 const spec=carSpecs[document.querySelector("#carSelect").value]||carSpecs.Gol;
-// Perfil de aceleração individual, com pequenas quedas de força nas trocas de marcha.
-if(accelerating&&!braking&&speed<100){elapsed+=dt;const targetAccel=100/spec.zero100;let shiftFactor=1;if(speed>28&&speed<34||speed>61&&speed<68)shiftFactor=.72;speed=Math.min(100,speed+targetAccel*shiftFactor*dt);}
-else if(braking){speed=Math.max(0,speed-58*dt);elapsed+=dt;}
-else if(speed>0){speed=Math.max(0,speed-2.4*dt);elapsed+=dt;}
-const move=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0);steerVelocity=THREE.MathUtils.damp(steerVelocity,move,8,dt);player.position.x=THREE.MathUtils.clamp(player.position.x+steerVelocity*dt*(2.6+speed*.018),-4.3,4.3);player.rotation.z=THREE.MathUtils.damp(player.rotation.z,-steerVelocity*(.08+speed*.0008),5,dt);player.rotation.x=THREE.MathUtils.damp(player.rotation.x,(accelerating?-0.025:braking?.045:0),3,dt);
-enginePhase+=dt*(4+speed*.45);const pace=(speed/100)*dt*85;document.querySelector("#speed").textContent=String(Math.round(speed)).padStart(3,"0");document.querySelector("#bar").style.width=speed+"%";document.querySelector("#elapsed").textContent=elapsed.toFixed(2);
+// Aceleração, arrasto, freio e trocas de marcha aproximados.
+const accelScale=100/(spec.zero100*2.05);
+if(accelerating&&!braking&&speed<100){elapsed+=dt;let gearLoss=1;if(speed>29&&speed<34||speed>64&&speed<69)gearLoss=.78;const drag=.018+speed*.00055;speed=Math.min(100,speed+Math.max(.7,accelScale-drag)*gearLoss*dt);}
+else if(braking){speed=Math.max(0,speed-62*dt);elapsed+=dt;}
+else if(speed>0){speed=Math.max(0,speed-(.9+speed*.025)*dt);elapsed+=dt;}
+const move=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0);
+steerVelocity=THREE.MathUtils.damp(steerVelocity,move,5.5,dt);
+const speedFactor=Math.max(.25,1-speed/145);
+player.position.x=THREE.MathUtils.clamp(player.position.x+steerVelocity*dt*(2.8+speed*.014),-4.3,4.3);
+player.rotation.z=THREE.MathUtils.damp(player.rotation.z,-steerVelocity*(.035+speed*.0007),4.2,dt);
+player.rotation.x=THREE.MathUtils.damp(player.rotation.x,(accelerating?-.035:braking?.06:0),2.2,dt);
+player.rotation.y=THREE.MathUtils.damp(player.rotation.y,-steerVelocity*(.06+speed*.0009),3.5,dt);
+for(const wheel of (player.userData.wheels||[])){wheel.rotation.y=enginePhase;}
+enginePhase+=dt*(3+speed*.52);const pace=(speed/100)*dt*85;document.querySelector("#speed").textContent=String(Math.round(speed)).padStart(3,"0");document.querySelector("#bar").style.width=speed+"%";document.querySelector("#elapsed").textContent=elapsed.toFixed(2);
 for(const s of stripes){s.position.z+=pace*1.8;if(s.position.z>12)s.position.z-=420}
 for(const t of scenery){t.position.z+=pace*1.8;if(t.position.z>15)t.position.z-=420}
 if(speed>=100){speed=100;document.querySelector("#speed").textContent="100";document.querySelector("#bar").style.width="100%";finishRun();}
 camera.position.x=THREE.MathUtils.damp(camera.position.x,player.position.x*.32+Math.sin(enginePhase*2)*speed*.0007,2.1,dt);camera.position.y=THREE.MathUtils.damp(camera.position.y,5.0+speed*.004+Math.sin(enginePhase*2)*speed*.00045,1.8,dt);camera.lookAt(player.position.x*.18,.9,-9);
-scene.fog.near=60;scene.fog.far=225-speed*.25;
+scene.fog.near=52;scene.fog.far=190-speed*.18;
 }
 function animate(now){requestAnimationFrame(animate);const dt=Math.min((now-last)/1000,.04);last=now;update(dt);renderer.render(scene,camera)}requestAnimationFrame(animate);
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5))});
