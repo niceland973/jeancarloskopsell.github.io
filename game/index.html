@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pixel Runner — Jogo 2D</title>
+<style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#101827;color:#eef4ff;font-family:system-ui,sans-serif;display:grid;place-items:center;padding:18px}
+main{width:min(900px,100%)}h1{margin:0 0 6px;font-size:clamp(1.5rem,4vw,2.4rem)}p{color:#b8c7df;margin:0 0 14px}
+.hud{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:12px 0;font-weight:700}
+canvas{display:block;width:100%;height:auto;border:2px solid #40516f;border-radius:12px;background:#91d7ef;touch-action:manipulation}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap}button{border:0;border-radius:10px;padding:12px 18px;font-weight:800;font-size:1rem;background:#6ee7b7;color:#10231e;cursor:pointer}button.secondary{background:#293850;color:#eef4ff}.help{font-size:.9rem;text-align:center;margin-top:10px;color:#b8c7df}
+</style></head>
+<body><main>
+<h1>🟩 Pixel Runner</h1><p>Um jogo 2D de plataforma: pule os obstáculos e tente bater seu recorde.</p>
+<div class="hud"><span>Pontos: <b id="score">0</b></span><span>Recorde: <b id="best">0</b></span><span id="status">Pronto para jogar</span></div>
+<canvas id="game" width="840" height="360" aria-label="Jogo de plataforma 2D"></canvas>
+<div class="controls"><button id="jump">PULAR ⤴</button><button id="restart" class="secondary">Recomeçar ↻</button></div>
+<div class="help">Controles: Espaço, ↑, toque na tela ou botão PULAR. Desvie dos blocos!</div>
+</main>
+<script>
+(() => {
+const c=document.getElementById('game'),ctx=c.getContext('2d');
+const scoreEl=document.getElementById('score'),bestEl=document.getElementById('best'),statusEl=document.getElementById('status');
+let player, obstacles, score, speed, frame, running, started, best=0, clouds;
+try{best=Number(localStorage.getItem('pixelRunnerBest')||0)}catch(e){}
+bestEl.textContent=best;
+function reset(){player={x:90,y:270,w:32,h:42,vy:0,ground:true};obstacles=[];score=0;speed=5;frame=0;running=true;started=true;clouds=[{x:130,y:65},{x:430,y:95},{x:700,y:55}];scoreEl.textContent='0';statusEl.textContent='Em jogo';}
+function jump(){if(!started||!running)reset();if(player.ground){player.vy=-13.5;player.ground=false}}
+function end(){running=false;statusEl.textContent='Fim de jogo';if(score>best){best=score;bestEl.textContent=best;try{localStorage.setItem('pixelRunnerBest',best)}catch(e){}}}
+function draw(){ctx.clearRect(0,0,c.width,c.height);
+let sky=ctx.createLinearGradient(0,0,0,360);sky.addColorStop(0,'#7dd3fc');sky.addColorStop(1,'#d9f7ff');ctx.fillStyle=sky;ctx.fillRect(0,0,840,360);
+ctx.fillStyle='#fff';for(const cl of (clouds||[])){ctx.beginPath();ctx.arc(cl.x,cl.y,17,0,Math.PI*2);ctx.arc(cl.x+19,cl.y-7,22,0,Math.PI*2);ctx.arc(cl.x+42,cl.y,15,0,Math.PI*2);ctx.fill()}
+ctx.fillStyle='#7ccf87';ctx.beginPath();ctx.moveTo(0,290);ctx.quadraticCurveTo(180,240,360,290);ctx.quadraticCurveTo(560,230,840,280);ctx.lineTo(840,360);ctx.lineTo(0,360);ctx.fill();
+ctx.fillStyle='#347c48';ctx.fillRect(0,312,840,48);ctx.fillStyle='#b7ef8b';ctx.fillRect(0,312,840,5);
+if(!player)player={x:90,y:270,w:32,h:42,vy:0,ground:true};
+ctx.fillStyle='#143d34';ctx.fillRect(player.x+3,player.y+8,player.w-6,player.h-8);ctx.fillStyle='#34d399';ctx.fillRect(player.x,player.y,player.w,player.h-7);ctx.fillStyle='#fff';ctx.fillRect(player.x+20,player.y+9,7,7);ctx.fillStyle='#102a2a';ctx.fillRect(player.x+23,player.y+11,3,4);ctx.fillStyle='#14532d';ctx.fillRect(player.x+5,player.y+player.h-5,8,5);ctx.fillRect(player.x+21,player.y+player.h-5,8,5);
+for(const o of (obstacles||[])){ctx.fillStyle='#b45309';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.fillStyle='#fbbf24';ctx.fillRect(o.x+4,o.y+4,o.w-8,6);ctx.fillStyle='#78350f';ctx.fillRect(o.x+o.w-6,o.y+10,6,o.h-10)}
+if(!started){ctx.fillStyle='rgba(15,23,42,.72)';ctx.fillRect(0,0,840,360);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 30px system-ui';ctx.fillText('PIXEL RUNNER',420,150);ctx.font='18px system-ui';ctx.fillText('Pressione PULAR para começar',420,190)}
+if(!running&&started){ctx.fillStyle='rgba(15,23,42,.65)';ctx.fillRect(0,0,840,360);ctx.fillStyle='#fff';ctx.textAlign='center';ctx.font='bold 34px system-ui';ctx.fillText('FIM DE JOGO',420,160);ctx.font='20px system-ui';ctx.fillText('Pontos: '+score+' — toque em PULAR para tentar de novo',420,202)}
+}
+function tick(){if(running&&started){frame++;player.vy+=.65;player.y+=player.vy;if(player.y+player.h>=312){player.y=312-player.h;player.vy=0;player.ground=true}
+if(frame%Math.max(42,Math.floor(88-speed*3))===0)obstacles.push({x:860,y:277,w:25+Math.random()*18|0,h:35+Math.random()*28|0});
+for(const o of obstacles)o.x-=speed;obstacles=obstacles.filter(o=>o.x+o.w>0);for(const o of obstacles){if(player.x+player.w-5>o.x&&player.x+5<o.x+o.w&&player.y+player.h>o.y){end();break}}
+for(const cl of clouds){cl.x-=.35;if(cl.x<-60)cl.x=900}
+if(frame%6===0){score++;scoreEl.textContent=score}speed=Math.min(10,5+score/180)}
+draw();requestAnimationFrame(tick)}
+document.getElementById('jump').addEventListener('click',jump);document.getElementById('restart').addEventListener('click',reset);
+c.addEventListener('pointerdown',jump);window.addEventListener('keydown',e=>{if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}if(e.key.toLowerCase()==='r')reset()});
+started=false;running=false;player={x:90,y:270,w:32,h:42,vy:0,ground:true};obstacles=[];clouds=[{x:130,y:65},{x:430,y:95},{x:700,y:55}];draw();tick();
+})();
+</script></body></html>
