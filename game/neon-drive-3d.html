@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#07111f">
-<title>NEON DRIVE 3D — High Speed</title>
+<title>NEON DRIVE 3D — Free Drive</title>
 <style>
 :root{color-scheme:dark}*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07111f;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#fff}#game{position:fixed;inset:0}canvas{display:block;width:100%;height:100%;outline:none}#hud{position:fixed;inset:0;pointer-events:none;padding:clamp(12px,2vw,28px);display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,rgba(2,8,18,.55),transparent 25%,transparent 65%,rgba(2,8,18,.45))}#top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.glass{background:rgba(5,15,30,.58);border:1px solid rgba(135,207,255,.25);box-shadow:0 8px 32px #0004;backdrop-filter:blur(12px);border-radius:16px;padding:12px 16px}.brand{font-size:clamp(12px,1.6vw,17px);font-weight:900;letter-spacing:.2em;color:#8ce8ff}.sub{font-size:10px;letter-spacing:.15em;color:#b6c7d8;margin-top:3px}.speedbox{text-align:right;min-width:140px}.speed{font-size:clamp(32px,6vw,58px);font-weight:900;line-height:.95;font-variant-numeric:tabular-nums}.unit{font-size:11px;letter-spacing:.2em;color:#9fb7ca}.meter{height:4px;background:#203246;border-radius:5px;margin-top:10px;overflow:hidden}.meter span{display:block;height:100%;width:0;background:linear-gradient(90deg,#28e5ff,#e6fffb);box-shadow:0 0 12px #28e5ff;transition:width .08s}#bottom{display:flex;justify-content:space-between;align-items:end;gap:12px}.stats{display:flex;gap:8px;flex-wrap:wrap}.stat{min-width:78px}.label{font-size:9px;color:#91a9bc;letter-spacing:.15em}.value{font-size:19px;font-weight:800;margin-top:3px}.hint{max-width:360px;text-align:right;color:#d6e6f2;font-size:12px;line-height:1.6;text-shadow:0 2px 8px #000}.center{position:fixed;inset:0;display:grid;place-items:center;background:radial-gradient(ellipse at center,rgba(4,12,24,.4),rgba(4,12,24,.83));pointer-events:auto}.panel{width:min(90vw,440px);text-align:center;padding:30px 26px;border-radius:24px;background:rgba(8,22,39,.88);border:1px solid #8ce8ff44;box-shadow:0 20px 80px #0008;backdrop-filter:blur(18px)}h1{font-size:clamp(26px,6vw,44px);letter-spacing:.07em;line-height:1;margin:0 0 12px}h1 em{font-style:normal;color:#79eaff}.panel p{color:#b5c9d9;line-height:1.6;font-size:14px}.btn{border:0;border-radius:12px;background:linear-gradient(110deg,#39dfff,#9af8ef);color:#061321;font-weight:900;letter-spacing:.12em;padding:15px 24px;width:100%;font-size:14px;cursor:pointer;margin-top:12px}.small{font-size:10px!important;color:#8199ad!important;letter-spacing:.08em}.hidden{display:none!important}#touch{position:fixed;bottom:100px;left:0;right:0;display:flex;justify-content:space-between;padding:0 22px;pointer-events:none}#touch button{pointer-events:auto;width:64px;height:64px;border-radius:50%;border:1px solid #a4efff66;background:#06182b99;color:#fff;font-size:24px;backdrop-filter:blur(8px)}@media(min-width:850px){#touch{display:none}}@media(max-width:500px){.glass{padding:10px 12px}.hint{max-width:175px;font-size:10px}.stat{min-width:65px}.value{font-size:16px}#bottom{align-items:end}}
 </style>
@@ -16,8 +16,8 @@
  <div id="bottom"><div class="stats"><div class="glass stat"><div class="label">DISTÂNCIA</div><div class="value"><span id="distance">0.00</span> <small>KM</small></div></div><div class="glass stat"><div class="label">PONTUAÇÃO</div><div class="value" id="score">00000</div></div><div class="glass stat"><div class="label">MELHOR</div><div class="value" id="best">00000</div></div></div><div class="hint">← → / A D para virar<br>W / ↑ acelerar · S / ↓ frear<br>Toque nas setas no celular</div></div>
 </div>
 <div id="touch"><button id="left" aria-label="Virar à esquerda">←</button><button id="right" aria-label="Virar à direita">→</button></div>
-<div id="start" class="center"><div class="panel"><h1>NEON <em>DRIVE</em></h1><p>Uma corrida 3D com estrada em perspectiva, iluminação dinâmica, tráfego e velocidade crescente.</p><button id="startBtn" class="btn">INICIAR CORRIDA</button><p class="small">VISUAL 3D · ALVO 60 FPS · RESOLUÇÃO ATÉ 1920×1080</p></div></div>
-<div id="crash" class="center hidden"><div class="panel"><h1>FIM DE <em>PISTA</em></h1><p id="result">Você colidiu.</p><button id="restartBtn" class="btn">CORRER NOVAMENTE</button></div></div>
+<div id="start" class="center"><div class="panel"><h1>NEON <em>DRIVE</em></h1><p>Dirija livremente por uma estrada 3D sem trânsito, obstáculos ou fim de pista. A viagem continua enquanto você quiser.</p><button id="startBtn" class="btn">INICIAR CORRIDA</button><p class="small">MODO LIVRE · ESTRADA INFINITA · SEM OBSTÁCULOS</p></div></div>
+
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
 <script>
 (()=> {
@@ -31,8 +31,8 @@ scene.add(new THREE.HemisphereLight(0xd8f0ff,0x34402d,2.0));
 const sun=new THREE.DirectionalLight(0xfff0d5,3.2);sun.position.set(-12,22,8);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
 const mat=(color,roughness=.8,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
 const asphalt=mat(0x252d37), grass=mat(0x416b48), lineMat=mat(0xf2f0d8), barrierMat=mat(0x8796a0,.5,.25);
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(400,500),grass);ground.rotation.x=-Math.PI/2;ground.position.set(0,-.14,-170);ground.receiveShadow=true;scene.add(ground);
-const road=new THREE.Mesh(new THREE.PlaneGeometry(12,500),asphalt);road.rotation.x=-Math.PI/2;road.position.set(0,-.08,-170);road.receiveShadow=true;scene.add(road);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(400,900),grass);ground.rotation.x=-Math.PI/2;ground.position.set(0,-.14,-420);ground.receiveShadow=true;scene.add(ground);
+const road=new THREE.Mesh(new THREE.PlaneGeometry(12,900),asphalt);road.rotation.x=-Math.PI/2;road.position.set(0,-.08,-420);road.receiveShadow=true;scene.add(road);
 const stripes=[];for(let z=-410;z<35;z+=9){for(const x of [-2,2]){const s=new THREE.Mesh(new THREE.BoxGeometry(.12,.025,4.5),lineMat);s.position.set(x,-.045,z);scene.add(s);stripes.push(s)}}
 for(const x of [-6.2,6.2]){const rail=new THREE.Mesh(new THREE.BoxGeometry(.22,.65,500),barrierMat);rail.position.set(x,.18,-170);rail.castShadow=true;scene.add(rail)}
 // roadside poles and stylized pine trees provide scale and parallax
@@ -41,15 +41,13 @@ function tree(x,z){const g=new THREE.Group();const trunk=new THREE.Mesh(new THRE
 for(let z=-400;z<20;z+=13){tree(-9-Math.random()*6,z);tree(9+Math.random()*6,z-5)}
 function makeCar(color=0x19cfff){const g=new THREE.Group();const body=new THREE.Mesh(new THREE.BoxGeometry(1.65,.55,3.1),mat(color,.28,.55));body.position.y=.72;body.castShadow=true;g.add(body);const cabin=new THREE.Mesh(new THREE.BoxGeometry(1.22,.52,1.45),mat(0x162c40,.18,.5));cabin.position.set(0,1.2,-.15);cabin.castShadow=true;g.add(cabin);const glass=new THREE.Mesh(new THREE.BoxGeometry(1.08,.33,.07),new THREE.MeshStandardMaterial({color:0x9cecff,metalness:.25,roughness:.12}));glass.position.set(0,1.25,.59);g.add(glass);for(const x of [-.58,.58]){const wheelMat=mat(0x11151b,.65);for(const z of [-.95,.95]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.32,.32,.22,12),wheelMat);w.rotation.z=Math.PI/2;w.position.set(x,.39,z);w.castShadow=true;g.add(w)}}const lampMat=new THREE.MeshBasicMaterial({color:0xeafaff});for(const x of [-.53,.53]){const l=new THREE.Mesh(new THREE.BoxGeometry(.34,.13,.06),lampMat);l.position.set(x,.76,1.56);g.add(l)}return g}
 const player=makeCar(0x16cfff);player.position.set(0,0,3);scene.add(player);
-const traffic=[];const colors=[0xff573d,0xf2c14e,0x8b7cff,0xe8edf2,0x43d17a];
-function spawnCar(z=-160){const c=makeCar(colors[Math.floor(Math.random()*colors.length)]);c.scale.setScalar(.85);c.position.set([-4,0,4][Math.floor(Math.random()*3)],0,z);scene.add(c);traffic.push(c)}
-for(let i=0;i<5;i++)spawnCar(-45-i*45);
-const keys={};let running=false,gameOver=false,speed=0,distance=0,score=0,last=performance.now(),spawnTimer=0,steer=0;
+
+const keys={};let running=false,speed=0,distance=0,score=0,last=performance.now();
 let best=Number(localStorage.getItem('neonDriveBest')||0);document.querySelector('#best').textContent=String(best).padStart(5,'0');
-function reset(){speed=0;distance=0;score=0;spawnTimer=0;gameOver=false;player.position.x=0;player.rotation.z=0;traffic.forEach((c,i)=>{c.position.z=-45-i*45;c.position.x=[-4,0,4][Math.floor(Math.random()*3)]});document.querySelector('#distance').textContent='0.00';document.querySelector('#score').textContent='00000';document.querySelector('#crash').classList.add('hidden');document.querySelector('#start').classList.add('hidden');running=true;last=performance.now()}
-function endGame(){running=false;gameOver=true;if(score>best){best=score;localStorage.setItem('neonDriveBest',String(best));document.querySelector('#best').textContent=String(best).padStart(5,'0')}document.querySelector('#result').textContent='Distância: '+distance.toFixed(2)+' km · Pontuação: '+score;document.querySelector('#crash').classList.remove('hidden')}
-document.querySelector('#startBtn').addEventListener('click',reset);document.querySelector('#restartBtn').addEventListener('click',reset);
-addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();if((e.key==='Enter'||e.key===' ')&&!running&&!gameOver)reset()});
+function reset(){speed=0;distance=0;score=0;player.position.x=0;player.rotation.z=0;document.querySelector('#distance').textContent='0.00';document.querySelector('#score').textContent='00000';document.querySelector('#start').classList.add('hidden');running=true;last=performance.now()}
+function saveBest(){if(score>best){best=score;localStorage.setItem('neonDriveBest',String(best));document.querySelector('#best').textContent=String(best).padStart(5,'0')}}
+document.querySelector('#startBtn').addEventListener('click',reset);
+addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key))e.preventDefault();if((e.key==='Enter'||e.key===' ')&&!running)reset()});
 addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 function hold(id,key){const b=document.getElementById(id);b.addEventListener('pointerdown',e=>{e.preventDefault();keys[key]=true;b.setPointerCapture(e.pointerId)});for(const ev of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(ev,()=>keys[key]=false)}
 hold('left','arrowleft');hold('right','arrowright');
@@ -60,9 +58,7 @@ const move=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0);player.po
 const pace=(speed/100)*dt*85;distance+=pace/1000;score+=Math.floor(pace*10);document.querySelector('#speed').textContent=String(Math.round(speed)).padStart(3,'0');document.querySelector('#bar').style.width=speed+'%';document.querySelector('#distance').textContent=distance.toFixed(2);document.querySelector('#score').textContent=String(score).padStart(5,'0');
 for(const s of stripes){s.position.z+=pace*1.8;if(s.position.z>12)s.position.z-=420}
 for(const t of scenery){t.position.z+=pace*1.8;if(t.position.z>15)t.position.z-=420}
-spawnTimer+=dt;if(spawnTimer>Math.max(.65,2.0-speed*.012)){spawnTimer=0;spawnCar(-190)}
-for(const c of traffic){c.position.z+=pace*1.35+dt*12;if(c.position.z>10){c.position.z=-180-Math.random()*60;c.position.x=[-4,0,4][Math.floor(Math.random()*3)];score+=150}
-if(Math.abs(c.position.z-player.position.z)<2.5&&Math.abs(c.position.x-player.position.x)<1.25){endGame();break}}
+saveBest();
 camera.position.x=THREE.MathUtils.damp(camera.position.x,player.position.x*.28,2.5,dt);camera.lookAt(player.position.x*.14,1,-8);
 scene.fog.near=60;scene.fog.far=225-speed*.25;
 }
