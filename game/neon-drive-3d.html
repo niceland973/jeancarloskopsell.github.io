@@ -64,7 +64,7 @@ const accelerating=keys.w||keys.arrowup,braking=keys.s||keys.arrowdown;
 // Aceleração simulada: o cronômetro mede do início até atingir 100 km/h.
 speed=Math.min(100,speed+(accelerating?30:0)*dt);
 if(braking)speed=Math.max(0,speed-45*dt);
-if(accelerating)elapsed+=dt;
+elapsed+=dt;
 const move=(keys.a||keys.arrowleft?-1:0)+(keys.d||keys.arrowright?1:0);player.position.x=THREE.MathUtils.clamp(player.position.x+move*dt*(4.2+speed*.025),-4.3,4.3);player.rotation.z=THREE.MathUtils.damp(player.rotation.z,-move*.12,7,dt);
 const pace=(speed/100)*dt*85;document.querySelector("#speed").textContent=String(Math.round(speed)).padStart(3,"0");document.querySelector("#bar").style.width=speed+"%";document.querySelector("#elapsed").textContent=elapsed.toFixed(2);
 for(const s of stripes){s.position.z+=pace*1.8;if(s.position.z>12)s.position.z-=420}
