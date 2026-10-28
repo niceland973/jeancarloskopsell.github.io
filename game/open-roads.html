@@ -30,11 +30,11 @@ const grassMat=mat(0x6c9b55),roadMat=mat(0x3e454b,.96),lineMat=mat(0xf1e8c8),edg
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(1500,1500),grassMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.18;scene.add(ground);
 const roadGroup=new THREE.Group();scene.add(roadGroup);
 const segments=[],roadWidth=10,segLen=18,segCount=36;
-function makeSegment(i){const g=new THREE.Group();const z=-i*segLen;const road=new THREE.Mesh(new THREE.PlaneGeometry(roadWidth,segLen+0.5),roadMat);road.rotation.x=-Math.PI/2;road.position.set(0,0,z);g.add(road);
+function makeSegment(i){const g=new THREE.Group();const z=0;g.position.z=-i*segLen;const road=new THREE.Mesh(new THREE.PlaneGeometry(roadWidth,segLen+0.5),roadMat);road.rotation.x=-Math.PI/2;road.position.set(0,0,z);g.add(road);
 for(const x of [-roadWidth/2+.12,roadWidth/2-.12]){const e=new THREE.Mesh(new THREE.BoxGeometry(.12,.035,segLen),edgeMat);e.position.set(x,.025,z);g.add(e)}
 const dash=new THREE.Mesh(new THREE.BoxGeometry(.13,.035,5),lineMat);dash.position.set(0,.03,z);g.add(dash);
-for(const side of [-1,1]){if((i+ (side===1?2:0))%2===0){const tree=makeTree();tree.position.set(side*(10+Math.random()*13),0,z+(Math.random()-.5)*9);tree.scale.setScalar(.7+Math.random()*.9);g.add(tree)}}
-g.userData.baseZ=z;roadGroup.add(g);segments.push(g)}
+for(const side of [-1,1]){if((i+ (side===1?2:0))%2===0){const tree=makeTree();tree.position.set(side*(10+Math.random()*13),0,(Math.random()-.5)*9);tree.scale.setScalar(.7+Math.random()*.9);g.add(tree)}}
+g.userData.baseZ=-i*segLen;roadGroup.add(g);segments.push(g)}
 function makeTree(){const g=new THREE.Group();const t=new THREE.Mesh(new THREE.CylinderGeometry(.13,.22,1.8,6),trunkMat);t.position.y=.9;g.add(t);const a=new THREE.Mesh(new THREE.ConeGeometry(1.05,2.6,7),leafMat);a.position.y=2.45;g.add(a);const b=new THREE.Mesh(new THREE.ConeGeometry(.75,1.8,7),leaf2);b.position.y=3.25;g.add(b);return g}
 for(let i=0;i<segCount;i++)makeSegment(i);
 const hills=[];for(let i=0;i<18;i++){const h=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),mat(i%2?0x7da66a:0x8caf72));h.scale.set(18+Math.random()*28,5+Math.random()*12,14+Math.random()*20);h.position.set((Math.random()<.5?-1:1)*(35+Math.random()*80),h.scale.y-1,-i*38-25);scene.add(h);hills.push(h)}
