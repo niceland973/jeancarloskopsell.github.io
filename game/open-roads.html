@@ -29,6 +29,9 @@ const mat=(c,r=.8,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,meta
 const grassMat=mat(0x6c9b55),roadMat=mat(0x3e454b,.96),lineMat=mat(0xf1e8c8),edgeMat=mat(0xd8d7c8),trunkMat=mat(0x70503a),leafMat=mat(0x3e7442),leaf2=mat(0x65934b);
 const ground=new THREE.Mesh(new THREE.PlaneGeometry(1500,1500),grassMat);ground.rotation.x=-Math.PI/2;ground.position.y=-.18;scene.add(ground);
 const roadGroup=new THREE.Group();scene.add(roadGroup);
+// Faixa contínua de segurança: mantém a pista visível mesmo durante a reciclagem dos detalhes.
+const continuousRoad=new THREE.Mesh(new THREE.PlaneGeometry(roadWidth,100000),roadMat);
+continuousRoad.rotation.x=-Math.PI/2;continuousRoad.position.set(0,-.005,-49990);scene.add(continuousRoad);
 const segments=[],roadWidth=10,segLen=18,segCount=36;
 function makeSegment(i){const g=new THREE.Group();const z=0;g.position.z=-i*segLen;const road=new THREE.Mesh(new THREE.PlaneGeometry(roadWidth,segLen+0.5),roadMat);road.rotation.x=-Math.PI/2;road.position.set(0,0,z);g.add(road);
 for(const x of [-roadWidth/2+.12,roadWidth/2-.12]){const e=new THREE.Mesh(new THREE.BoxGeometry(.12,.035,segLen),edgeMat);e.position.set(x,.025,z);g.add(e)}
